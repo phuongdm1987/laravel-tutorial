@@ -1,0 +1,103 @@
+version: '3'  #version của docker compose
+services:  #nơi khai báo các dịch vụ (php, mysql, supervisor ...)
+  app_base: # khởi tạo app base (dịch vụ để chạy ứng dụng của chúng ta)
+    build:
+      context: docker/php
+    container_name: tutorial-app-base  # tên container của dịch vụ
+    volumes:
+      - .:/var/www:rw  #mount - đồng bộ dữ liệu ở máy và bên trong container
+    networks:  # tên mạng của project
+      - tutorial_network
+    env_file:  # load các env từ file chỉ định
+      - docker/env/main.env
+      - docker/env/mail.env
+      - docker/env/mysql.env
+      - docker/env/redis.env
+      - .env
+
+  app:  # extends từ app_base và tạo image tag `tutorial-app-dev` để dùng cho các dịch vụ khác như cron, supervisor
+    extends:
+      service: app_base
+    container_name: tutorial-app
+    image: tutorial-app-dev
+    depends_on:  # phụ thuộc vào các dịch vụ khác
+      - mysql
+      - redis
+
+  nginx:
+    build:
+      context: docker/nginx
+    container_name: tutorial-nginx
+    volumes:
+      - ./:/var/www
+    networks:
+      tutorial_network:
+        aliases:
+          - project_name.local
+    ports:
+      - 88:80  #port của dịch vụ (external port:internal port)
+    depends_on:
+      - app
+
+  mysql:
+    image: 'mysql:8.0'
+    container_name: tutorial-mysql
+    ports:
+      - '3309:3306'
+    environment:  # khai báo biến môi trường
+      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - 'mysql:/var/lib/mysql'
+    networks:
+      - tutorial_network
+
+  redis:
+    image: 'redis:alpine'
+    container_name: tutorial-redis
+    ports:
+      - '6318:6379'
+    volumes:
+      - 'redis:/data'
+    networks:
+      - tutorial_network
+
+  mailhog:
+    image: 'mailhog/mailhog:latest'
+    container_name: tutorial-mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025
+    networks:
+      - tutorial_network
+
+  supervisor:
+    build:
+      context: docker/supervisor
+    container_name: tutorial-supervisor
+    volumes:
+      - .:/var/www
+      - ${PWD}/docker/supervisor/supervisord:/etc/supervisord.d
+    networks:
+      - tutorial_network
+
+  cron:
+    build:
+      context: docker/cron
+    container_name: tutorial-cron
+    volumes:
+      - .:/var/www
+    networks:
+      - tutorial_network
+
+networks:
+  tutorial_network:
+    driver: bridge
+
+volumes:  # khai báo nơi lưu trữ dữ liệu của container
+  mysql:
+    driver: local
+  redis:
+    driver: local
+  cron:
+    driver: local
