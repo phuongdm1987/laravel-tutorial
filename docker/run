@@ -15,7 +15,7 @@ print_usage() {
 
 case "$1" in
 'artisan')
-    docker exec -i publisher-app php artisan ${@:2}
+    docker exec -i tutorial-app php artisan ${@:2}
     ;;
 
 'composer')
