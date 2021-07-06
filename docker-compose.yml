@@ -35,7 +35,7 @@ services:  #nơi khai báo các dịch vụ (php, mysql, supervisor ...)
         aliases:
           - project_name.local
     ports:
-      - 88:80  #port của dịch vụ (external port:internal port)
+      - 90:80  #port của dịch vụ (external port:internal port)
     depends_on:
       - app
 
@@ -43,7 +43,7 @@ services:  #nơi khai báo các dịch vụ (php, mysql, supervisor ...)
     image: 'mysql:8.0'
     container_name: tutorial-mysql
     ports:
-      - '3309:3306'
+      - '3311:3306'
     environment:  # khai báo biến môi trường
       MYSQL_ROOT_PASSWORD: ''
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
@@ -66,8 +66,8 @@ services:  #nơi khai báo các dịch vụ (php, mysql, supervisor ...)
     image: 'mailhog/mailhog:latest'
     container_name: tutorial-mailhog
     ports:
-      - 1025:1025
-      - 8025:8025
+      - 1027:1025
+      - 8027:8025
     networks:
       - tutorial_network
 

@@ -43,7 +43,7 @@ class PostFactory extends Factory
             'title' => $title,
             'slug' => Str::lower($slug),
             'summary' => $this->faker->paragraph,
-            'content' => $this->faker->realText(),
+            'content' => $this->faker->realText(2000),
             'status' => $status,
         ];
     }

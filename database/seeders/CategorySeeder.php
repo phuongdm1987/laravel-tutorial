@@ -57,9 +57,14 @@ class CategorySeeder extends Seeder
 
         $tags = Tag::factory()->count(10)->create();
 
-        $posts = Post::factory()->count(10)->create([
-            'category_id' => $categories->random()->id,
-        ]);
+        $posts = collect();
+        for ($i = 1; $i <= 10; $i++) {
+            $post = Post::factory()->create([
+                'category_id' => $categories->random()->id,
+            ]);
+
+            $posts->add($post);
+        }
 
         foreach ($posts as $post) {
             $post->tags()->sync([
@@ -67,9 +72,14 @@ class CategorySeeder extends Seeder
             ]);
         }
 
-        $comments = Comment::factory()->count(10)->create([
-            'post_id' => $posts->random()->id,
-        ]);
+        $comments = collect();
+        for ($i = 1; $i <= 10; $i++) {
+            $comment = Comment::factory()->create([
+                'post_id' => $posts->random()->id,
+            ]);
+
+            $comments->add($comment);
+        }
 
         foreach ($comments as $comment) {
             Comment::factory([

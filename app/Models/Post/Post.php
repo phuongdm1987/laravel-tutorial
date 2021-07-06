@@ -6,11 +6,12 @@ namespace App\Models\Post;
 use App\Models\Category\Category;
 use App\Models\Comment\Comment;
 use App\Models\Tag\Tag;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class Post
@@ -20,12 +21,40 @@ class Post extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'author_id',
+        'category_id',
+        'title',
+        'slug',
+        'summary',
+        'content',
+        'status',
+    ];
+
     /**
-     * @return HasOne
+     * @param mixed $value
+     * @param null $field
+     * @return Model|null
      */
-    public function category(): HasOne
+    public function resolveRouteBinding($value, $field = null): ?Model
     {
-        return $this->hasOne(Category::class);
+        return Post::where('slug', $value)->firstOrFail();
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     /**
